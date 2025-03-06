@@ -23,20 +23,22 @@ public class CustomerListQueryResponseCategory
     public string Description { get; set; } = "";
 }
 
-/*
-internal class CustomerListQueryHandler (BackendContext context) : IRequestHandler<CustomersListQuery, List<CustomersListQueryResponse>>
+
+internal class CustomerListQueryHandler (BackendContext context) : IRequestHandler<CustomerListQuery, List<CustomerListQueryResponse>>
 {
-    private readonly BackendContext context = context;
 
     public async Task<List<CustomerListQueryResponse>> Handle(CustomerListQuery request, CancellationToken cancellationToken)
     {
         var query = context.Customers.AsQueryable();
         if (!string.IsNullOrEmpty(request.SearchText)) {
-            query = query.Where(q => q.Name.ToLower().Contains(request.SearchText.ToLower()));
-            query = query.Where(q => q.Email.ToLower().Contains(request.SearchText.ToLower()));
+            query = query.Where(q => 
+                q.Name.ToLower().Contains(request.SearchText.ToLower()) ||
+                q.Email.ToLower().Contains(request.SearchText.ToLower())
+            );
         }
 
-        var data = await query.OrderBy(q => q.Name).ThenBy(q => q.Email).ToListAsync(cancellationToken);
+        var data = await query.ToListAsync(cancellationToken);
+
         var result = new List<CustomerListQueryResponse>();
 
         foreach (var item in data)
@@ -44,17 +46,16 @@ internal class CustomerListQueryHandler (BackendContext context) : IRequestHandl
             var resultItem = new CustomerListQueryResponse
             {
                 Id = item.Id,
-                Code = item.Code,
-                FirstName = item.FirstName,
-                LastName = item.LastName,
+                Name = item.Name,
                 Address = item.Address,
                 Email = item.Email,
                 Phone = item.Phone,
+                Iban = item.Iban,
             };
 
-            var category = await context.CustomerCategories.SingleOrDefaultAsync(q => q.Id == item.DepartmentId, cancellationToken);
+            var category = await context.CustomerCategories.SingleOrDefaultAsync(q => q.Id == item.CustomerCategoryId, cancellationToken);
             if (category is not null)
-                resultItem.Department = new CustomerListQueryResponseCategory
+                resultItem.CustomerCategory = new CustomerListQueryResponseCategory
                 {
                     Code = category.Code,
                     Description = category.Description
@@ -69,4 +70,3 @@ internal class CustomerListQueryHandler (BackendContext context) : IRequestHandl
     }
 
 }
-*/
