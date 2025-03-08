@@ -3,6 +3,17 @@ namespace Backend.Features.Customers;
 public class CustomerListQuery : IRequest<List<CustomerListQueryResponse>>
 {
     public string? SearchText { get; set; }
+    public string? SortBy { get; set; }
+    public bool? Descending { get; set; }
+    public int? Skip { get; set; }
+    public int? Take { get; set; }
+    public CustomerListQuery()
+    {
+        Descending = PaginationDefaults.DEFAULT_DESCENDING;
+        Skip = PaginationDefaults.DEFAULT_SKIP;
+        Take = PaginationDefaults.DEFAULT_TAKE;
+    }
+
 }
 
 public class CustomerListQueryResponse
@@ -36,6 +47,31 @@ internal class CustomerListQueryHandler (BackendContext context) : IRequestHandl
                 q.Email.ToLower().Contains(request.SearchText.ToLower())
             );
         }
+
+        
+        if (!string.IsNullOrEmpty(request.SortBy)) {
+            
+            switch (request.SortBy.ToLower().Trim()) {
+                case "email":
+                    query = request.Descending ?? PaginationDefaults.DEFAULT_DESCENDING
+                            ? query.OrderByDescending(q => q.Email)
+                            : query.OrderBy(q => q.Email);
+                break;
+
+                default:
+                    query = request.Descending ?? PaginationDefaults.DEFAULT_DESCENDING
+                            ? query.OrderByDescending(q => q.Name)
+                            : query.OrderBy(q => q.Name);
+                break;
+            }
+
+        }
+        
+
+        query = query.Skip(request.Skip ?? PaginationDefaults.DEFAULT_SKIP)
+                     .Take(request.Take ?? PaginationDefaults.DEFAULT_TAKE);
+        
+
 
         var data = await query.ToListAsync(cancellationToken);
 

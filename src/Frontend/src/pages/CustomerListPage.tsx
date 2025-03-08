@@ -121,7 +121,7 @@ export default function CustomerListPage() {
     return (
     <>
         <Typography variant="h4" sx={{ textAlign: "center", mt: 4, mb: 4 }}>
-        Suppliers
+        Customers
         </Typography>
 
         <Box sx={{ display: "flex", gap: 2, mb: 3, alignItems: "center" }}>
